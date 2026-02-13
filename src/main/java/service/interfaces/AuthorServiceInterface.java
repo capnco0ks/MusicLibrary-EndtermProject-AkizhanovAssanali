@@ -10,4 +10,5 @@ public interface AuthorServiceInterface {
     Author getById(int id);
     void update(int id, String newName, int newRating);
     void delete(int id);
+    void clearCache();
 }

@@ -1,5 +1,6 @@
 package service;
 
+import cache.AuthorCacheSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import exception.AuthorNotFoundException;
@@ -12,15 +13,18 @@ import service.interfaces.AuthorServiceInterface;
 
 import java.util.List;
 import java.util.Comparator;
+import java.util.ArrayList;
 
 @Service
 public class AuthorService implements AuthorServiceInterface {
 
     private final CrudRepository<Author> authorRepository;
+    private final AuthorCacheSingleton authorCache;
 
     @Autowired
     public AuthorService(CrudRepository<Author> repository) {
         this.authorRepository = repository;
+        this.authorCache = AuthorCacheSingleton.getInstance();
     }
 
     @Override
@@ -32,13 +36,19 @@ public class AuthorService implements AuthorServiceInterface {
             throw new DuplicateResourceException("Author with this ID already exists");
         } catch (AuthorNotFoundException e) {
             authorRepository.create(author);
+            clearCache();
         }
     }
 
     @Override
     public List<Author> getAll() {
+        List<Author> cachedAuthors = authorCache.getAllAuthors();
+        if (cachedAuthors != null) {
+            return new ArrayList<>(cachedAuthors);
+        }
         List<Author> authors = authorRepository.getAll();
         authors.sort(Comparator.comparingInt(Author::getRating).reversed());
+        authorCache.putAllAuthors(new ArrayList<>(authors));
         return authors;
     }
 
@@ -59,6 +69,7 @@ public class AuthorService implements AuthorServiceInterface {
         Author updated = new Author(id, newName, newRating);
         try {
             authorRepository.update(id, updated);
+            clearCache();
         } catch (Exception e) {
             throw new ResourceNotFoundException("Author with id " + id + " not found");
         }
@@ -69,8 +80,13 @@ public class AuthorService implements AuthorServiceInterface {
         if (id <= 0) throw new InvalidInputException("ID must be positive");
         try {
             authorRepository.delete(id);
+            clearCache();
         } catch (Exception e) {
             throw new ResourceNotFoundException("Author with id " + id + " not found");
         }
+    }
+    @Override
+    public void clearCache(){
+        authorCache.clear();
     }
 }

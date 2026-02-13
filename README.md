@@ -1,5 +1,31 @@
 # Music Library Spring Boot API
 
+# Cache Clearing (In-Memory)
+## EXAMPLE SCREENSHOTS YOU CAN SEE IN DOCS PACKAGE
+
+
+This project now includes a simple in-memory cache for `GET /api/authors`
+
+## What was added
+- Caching of author list responses in memory.
+- Automatic cache invalidation after data-changing operations:
+    - `POST /api/authors`
+    - `PUT /api/authors/{id}`
+    - `DELETE /api/authors/{id}`
+- Manual cache clearing endpoint:
+    - `DELETE /api/authors/cache`
+
+## Manual clear example
+```bash
+DELETE http://localhost:8080/api/authors/cache
+```
+
+## Why this is useful
+- Reduces repeated DB reads for frequent `GET /api/authors` calls.
+- Keeps data fresh after create/update/delete operations.
+
+
+
 ## Project Overview
 
 This project is a **Music Library** backend application built with Spring Boot. It provides REST API endpoints for managing authors and demonstrates design patterns, component principles, and SOLID architecture.

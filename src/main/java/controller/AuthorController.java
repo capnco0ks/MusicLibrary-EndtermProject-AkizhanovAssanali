@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import cache.AuthorCacheSingleton;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/authors")
@@ -49,6 +51,11 @@ public class AuthorController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
         authorService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+    @DeleteMapping("/cache")
+    public ResponseEntity<Void> clearCache() {
+        authorService.clearCache();
         return ResponseEntity.noContent().build();
     }
 }
